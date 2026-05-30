@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "dev" : "node --watch main.js"
+    "dev": "node --watch main.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/KOCTA2024/123/issues"
   },
-  "homepage": "https://github.com/KOCTA2024/123#readme"
+  "homepage": "https://github.com/KOCTA2024/123#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
 }
