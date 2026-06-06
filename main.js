@@ -13,7 +13,7 @@ const __dirname = dirname(__filename);
 const server = createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
-    if (req.url.startsWith("/results")){
+    if (req.url.startsWith("/search")){
         res.writeHead(200, {"content-type": "text/html"})
         res.end(resolvePathToFile("results.html"));
         return
