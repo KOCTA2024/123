@@ -13,6 +13,11 @@ const __dirname = dirname(__filename);
 const server = createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
+    if (req.url.startsWith("/results")){
+        res.writeHead(200, {"content-type": "text/html"})
+        res.end(resolvePathToFile("results.html"));
+        return
+    }
     switch (url.pathname) {
         case "/":
             res.writeHead(200, { "content-type": "text/html" });
@@ -43,6 +48,7 @@ const server = createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: err.message }));
             }
             break;
+
 
         default:
             res.writeHead(404);
