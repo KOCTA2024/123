@@ -13,7 +13,7 @@ const __dirname = dirname(__filename);
 const server = createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
-    if (req.url.startsWith("/results")){
+    if (req.url.startsWith("/search")){
         res.writeHead(200, {"content-type": "text/html"})
         res.end(resolvePathToFile("results.html"));
         return
@@ -34,7 +34,7 @@ const server = createServer(async (req, res) => {
             res.end(resolvePathToFile("script.js"));
             break;
 
-        case "/search":
+        case "/api/search":
             const primaryTitle = url.searchParams.get("primaryTitle") ?? "";
             const genre = url.searchParams.get("genre") ?? "";
             const originalTitle = url.searchParams.get("originalTitle") ?? "";
