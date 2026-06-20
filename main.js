@@ -61,13 +61,36 @@ const server = createServer(async (req, res) => {
             }
             break;
         }
-        case "/api/searchByGenre":
-            try{
+        case "/api/filters": {
+            const primaryTitle = url.searchParams.get("primaryTitle") ?? "";
             const genre = url.searchParams.get("genre") ?? "";
-            const results = await searchByGenre(genre)
-            res.writeHead(200, { "content-type": "application/json" });
-            res.end(JSON.stringify(results));
-            }catch(err){
+            const originalTitle = url.searchParams.get("originalTitle") ?? "";
+            const aggregateRating = url.searchParams.get("aggregateRating") ?? "";
+
+            // if (!primaryTitle && !genre && !originalTitle) {
+            //     res.writeHead(400, { "content-type": "application/json" });
+            //     res.end(JSON.stringify({ error: "Укажите хотя бы один параметр: primaryTitle, genre або originalTitle" }));
+            //     break;
+            // }
+
+            try {
+                // ✅ передаємо всі три параметри
+                const results = await search(primaryTitle, genre, originalTitle, aggregateRating);
+                res.writeHead(200, { "content-type": "application/json" });
+                res.end(JSON.stringify(results));
+            } catch (err) {
+                res.writeHead(500, { "content-type": "application/json" });
+                res.end(JSON.stringify({ error: err.message }));
+            }
+            break;
+        }
+
+        case "/availableGenres":
+            try {
+                const genres = await getGenres();
+                res.writeHead(200, { "content-type": "application/json" });
+                res.end(JSON.stringify(genres));
+            } catch (err) {
                 res.writeHead(500, { "content-type": "application/json" });
                 res.end(JSON.stringify({ error: err.message }));
             }
@@ -84,19 +107,19 @@ const server = createServer(async (req, res) => {
 // ✅ виправлено: limit замість rows, додано originalTitle
 async function search(query = "", genre = "", originalTitle = "", aggregateRating="") {
     const params = new URLSearchParams({
-        // type: "movie",
-        // limit: 10,          // ✅ було rows: 10 — API його ігнорувало
-        // sortOrder: "DESC",
-        // sortField: "numVotes",
-        minAggregateRating: aggregateRating,
-        maxAggregateRating: Number(aggregateRating) + 1,
+        type: "movie",
+        limit: 10,          // ✅ було rows: 10 — API його ігнорувало
+        sortOrder: "DESC",
+        sortField: "numVotes",
+        // minAggregateRating: aggregateRating,
+        // maxAggregateRating: Number(aggregateRating) + 1,
         ...(genre && { genre }),
         ...(query && { query }),
         ...(originalTitle && { primaryTitle: originalTitle }), // ✅ тепер передається
     });
 
     const response = await fetch(
-        `https://api.imdbapi.dev/titles?${params}`,
+        `https://api.imdbapi.dev/search/titles?${params}`,
         {
             method: "GET",
             headers: {
