@@ -43,14 +43,9 @@ const server = createServer(async (req, res) => {
             const genre = url.searchParams.get("genre") ?? "";
             const originalTitle = url.searchParams.get("originalTitle") ?? "";
 
-            if (!primaryTitle && !genre && !originalTitle) {
-                res.writeHead(400, { "content-type": "application/json" });
-                res.end(JSON.stringify({ error: "Укажите хотя бы один параметр: primaryTitle, genre або originalTitle" }));
-                break;
-            }
+
 
             try {
-                // ✅ передаємо всі три параметри
                 const results = await search(primaryTitle, genre, originalTitle);
                 res.writeHead(200, { "content-type": "application/json" });
                 res.end(JSON.stringify(results));
@@ -60,28 +55,19 @@ const server = createServer(async (req, res) => {
             }
             break;
         }
-
-        case "/availableGenres":
-            try {
-                const genres = await getGenres();
-                res.writeHead(200, { "content-type": "application/json" });
-                res.end(JSON.stringify(genres));
-            } catch (err) {
+        case "/api/searchByGenre":
+            try{
+            const genre = url.searchParams.get("genre") ?? "";
+            const results = await searchByGenre(genre)
+            res.writeHead(200, { "content-type": "application/json" });
+            res.end(JSON.stringify(results));
+            }catch(err){
                 res.writeHead(500, { "content-type": "application/json" });
                 res.end(JSON.stringify({ error: err.message }));
             }
             break;
-
-        case "/topFilms":
-            try {
-                const films = await getTopFilms();
-                res.writeHead(200, { "content-type": "application/json" });
-                res.end(JSON.stringify(films));
-            } catch (err) {
-                res.writeHead(500, { "content-type": "application/json" });
-                res.end(JSON.stringify({ error: err.message }));
-            }
-            break;
+            
+            
 
         default:
             res.writeHead(404);
@@ -118,44 +104,19 @@ async function search(query = "", genre = "", originalTitle = "") {
     return response.json();
 }
 
-async function getGenres() {
-    const response = await fetch(
-        "https://imdb236.p.rapidapi.com/api/imdb/genres",
-        {
+async function searchByGenre(genre = "", minAggregateRating = 0, maxAggregateRating = 10){
+    const response = await fetch(`https://api.imdbapi.dev/titles?genres=${genre}`,
+                {
             method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "x-rapidapi-host": "imdb236.p.rapidapi.com",
-                "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+                'accept': 'application/json'
             },
-        }
-    );
-
-    if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+            }
+        )
+    if(!response.ok){
+        throw new Error(`API error: ${response.status}`)
     }
-
-    return response.json();
-}
-
-async function getTopFilms() {
-    const response = await fetch(
-        "https://imdb236.p.rapidapi.com/api/imdb/top250-movies",
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "x-rapidapi-host": "imdb236.p.rapidapi.com",
-                "x-rapidapi-key": process.env.RAPIDAPI_KEY,
-            },
-        }
-    );
-
-    if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-    }
-
-    return response.json();
+    return response.json()
 }
 
 function resolvePathToFile(file) {
