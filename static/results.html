@@ -41,7 +41,7 @@
             })
         }
         else if( aggregateRating){
-            fetch("/api/search?aggregateRating=" + aggregateRating).then(res => res.json()).then(data => {
+            fetch("/api/titles?aggregateRating=" + aggregateRating).then(res => res.json()).then(data => {
                 console.log(data)
                 data.titles.forEach(m => {
                     fetch(`https://api.imdbapi.dev/titles/${m.id}`)

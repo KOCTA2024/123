@@ -61,42 +61,20 @@ const server = createServer(async (req, res) => {
             }
             break;
         }
-        case "/api/filters": {
-            const primaryTitle = url.searchParams.get("primaryTitle") ?? "";
+        case "/api/titles": {
             const genre = url.searchParams.get("genre") ?? "";
-            const originalTitle = url.searchParams.get("originalTitle") ?? "";
-            const aggregateRating = url.searchParams.get("aggregateRating") ?? "";
-
-            // if (!primaryTitle && !genre && !originalTitle) {
-            //     res.writeHead(400, { "content-type": "application/json" });
-            //     res.end(JSON.stringify({ error: "Укажите хотя бы один параметр: primaryTitle, genre або originalTitle" }));
-            //     break;
-            // }
-
-            try {
-                // ✅ передаємо всі три параметри
-                const results = await search(primaryTitle, genre, originalTitle, aggregateRating);
+            const minAggregateRating = url.searchParams.get("minAggregateRating") ?? 0;
+            const maxAggregateRating = url.searchParams.get("MaxAggregateRating") ?? 10;
+            try{
+                const results = await titles(genre, minAggregateRating, maxAggregateRating)
                 res.writeHead(200, { "content-type": "application/json" });
                 res.end(JSON.stringify(results));
-            } catch (err) {
-                res.writeHead(500, { "content-type": "application/json" });
-                res.end(JSON.stringify({ error: err.message }));
-            }
-            break;
-        }
 
-        case "/availableGenres":
-            try {
-                const genres = await getGenres();
-                res.writeHead(200, { "content-type": "application/json" });
-                res.end(JSON.stringify(genres));
-            } catch (err) {
+            }catch(err){
                 res.writeHead(500, { "content-type": "application/json" });
                 res.end(JSON.stringify({ error: err.message }));
             }
-            break;
-            
-            
+        }
 
         default:
             res.writeHead(404);
@@ -136,7 +114,7 @@ async function search(query = "", genre = "", originalTitle = "", aggregateRatin
     return response.json();
 }
 
-async function searchByGenre(genre = "", minAggregateRating = 0, maxAggregateRating = 10){
+async function titles(genre = "", minAggregateRating = 0, maxAggregateRating = 10){
     const response = await fetch(`https://api.imdbapi.dev/titles?genres=${genre}`,
                 {
             method: "GET",
